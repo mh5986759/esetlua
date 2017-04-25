@@ -5982,82 +5982,93 @@ function tdcli_update_callback(data)
                 end
               end
         -----------------------------------------------------------------------------------------------
-            if text:match("^[Hh]esab$") or text:match("^شماره حساب$") then
-            unpinssmsg(msg.chat_id_)
-			             if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "5894631546347881
-رضا رضوانی گیل کلائی", 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "5894631546347881
-رضا رضوانی گیل کلائی", 1, 'md')
+              if text:match("^[Gg]view$") then
+                database:set('bot:viewget'..msg.sender_user_id_,true)
+                send(msg.chat_id_, msg.id_, 1, '🔹لطفا مطلب خود را فروراد کنید : ', 1, 'md')
+              end
+              -----------------------------------------------------------------------------------------------
+              if text:match("^[Pp]ayping$") and is_sudo(msg) then
+                send(msg.chat_id_, msg.id_, 1, 'https://www.payping.ir/EndlessLine', 1, 'html')
+              end
+            end
+            -----------------------------------------------------------------------------------------------
+          end
+          -----------------------------------------------------------------------------------------------
+          -- end code --
+          -----------------------------------------------------------------------------------------------
+        elseif (data.ID == "UpdateChat") then
+          chat = data.chat_
+          chats[chat.id_] = chat
+          -----------------------------------------------------------------------------------------------
+        elseif (data.ID == "UpdateMessageEdited") then
+          local msg = data
+          -- vardump(msg)
+          function get_msg_contact(extra, result, success)
+            local text = (result.content_.text_ or result.content_.caption_)
+            --vardump(result)
+            if result.id_ and result.content_.text_ then
+              database:set('bot:editid'..result.id_,result.content_.text_)
+            end
+            if not is_mod(result.sender_user_id_, result.chat_id_) then
+              check_filter_words(result, text)
+              if database:get('editmsg'..msg.chat_id_) then
+                local msgs = {[0] = data.message_id_}
+                delete_msg(msg.chat_id_,msgs)
+              end
+              if text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]") or text:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]") or text:match("[Tt].[Mm][Ee]") then
+                if database:get('bot:links:mute'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
                 end
+              end
+              if text:match("[Hh][Tt][Tt][Pp][Ss]://") or text:match("[Hh][Tt][Tt][Pp]://") or text:match(".[Ii][Rr]") or text:match(".[Cc][Oo][Mm]") or text:match(".[Oo][Rr][Gg]") or text:match(".[Ii][Nn][Ff][Oo]") or text:match("[Ww][Ww][Ww].") or text:match(".[Tt][Kk]") then
+                if database:get('bot:webpage:mute'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if text:match("@") then
+                if database:get('tags:lock'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if msg.content_.entities_[0].ID == "MessageEntityBold" or msg.content_.entities_[0].ID == "MessageEntityCode" or msg.content_.entities_[0].ID == "MessageEntityPre" or msg.content_.entities_[0].ID == "MessageEntityItalic" then
+                if database:get('markdown:lock'..msg.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if msg.content_.entities_[0].ID and msg.content_.entities_[0].ID == "MessageEntityMentionName" then
+                if database:get('mention:lock'..msg.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if text:match("#") then
+                if database:get('bot:hashtag:mute'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if text:match("[\216-\219][\128-\191]") then
+                if database:get('bot:arabic:mute'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+              if text:match("[ASDFGHJKLQWERTYUIOPZXCVBNMasdfghjklqwertyuiopzxcvbnm]") then
+                if database:get('bot:english:mute'..result.chat_id_) then
+                  local msgs = {[0] = data.message_id_}
+                  delete_msg(msg.chat_id_,msgs)
+                end
+              end
+            end
           end
-      -----------------------------------------------------------------------------------------------
-    end
-    -----------------------------------------------------------------------------------------------
-    -- END CODE --
-    -- Number Update 5
-    -----------------------------------------------------------------------------------------------
-  elseif (data.ID == "UpdateChat") then
-    chat = data.chat_
-    chats[chat.id_] = chat
-    -----------------------------------------------------------------------------------------------
-  elseif (data.ID == "UpdateMessageEdited") then
-    local msg = data
-    function get_msg_contact(extra, result, success)
-      local text = (result.content_.text_ or result.content_.caption_)
-      if result.id_ and result.content_.text_ then
-        database:set('bot:editid'..result.id_,result.content_.text_)
+          getMessage(msg.chat_id_, msg.message_id_,get_msg_contact)
+          -----------------------------------------------------------------------------------------------
+        elseif (data.ID == "UpdateOption" and data.name_ == "my_id") then
+          tdcli_function ({ID="GetChats", offset_order_="9223372036854775807", offset_chat_id_=0, limit_=20}, dl_cb, nil)
+        end
+        -----------------------------------------------------------------------------------------------
       end
-      if not is_vipmem(result.sender_user_id_, result.chat_id_) then
-        check_filter_words(result, text)
-        if database:get('editmsg'..msg.chat_id_) then
-          local msgs = {[0] = data.message_id_}
-          delete_msg(msg.chat_id_,msgs)
-        end
-        if text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]") or text:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]") or text:match("[Tt].[Mm][Ee]") then
-          if database:get('bot:links:mute'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-        if text:match("[Hh][Tt][Tt][Pp][Ss]://") or text:match("[Hh][Tt][Tt][Pp]://") or text:match(".[Ii][Rr]") or text:match(".[Cc][Oo][Mm]") or text:match(".[Oo][Rr][Gg]") or text:match(".[Ii][Nn][Ff][Oo]") or text:match("[Ww][Ww][Ww].") or text:match(".[Tt][Kk]") or text:match("/") then
-          if database:get('bot:webpage:mute'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-        if text:match("@") then
-          if database:get('tags:lock'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-        if text:match("#") then
-          if database:get('bot:hashtag:mute'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-        if text:match("[\216-\219][\128-\191]") then
-          if database:get('bot:arabic:mute'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-        if text:match("[A-Z]") or text:match("[a-z]") then
-          if database:get('bot:english:mute'..result.chat_id_) then
-            local msgs = {[0] = data.message_id_}
-            delete_msg(msg.chat_id_,msgs)
-          end
-        end
-      end
-    end
-    getMessage(msg.chat_id_, msg.message_id_,get_msg_contact)
-    -----------------------------------------------------------------------------------------------
-  elseif (data.ID == "UpdateOption" and data.name_ == "my_id") then
-    tdcli_function ({ID="GetChats", offset_order_="9223372036854775807", offset_chat_id_=0, limit_=20}, dl_cb, nil)
-  end
-  -----------------------------------------------------------------------------------------------
-end
--- END VERSION 3.5
