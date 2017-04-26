@@ -1815,1754 +1815,737 @@ function tdcli_update_callback(data)
       ---------------------------******** END MSG CHECKS ********--------------------------------------------
       -------------------------------------------------------------------------------------------------------
       -------------------------------------------------------------------------------------------------------
-	 local text = text:gsub('[!/#]','')
-      if database:get('bot:cmds'..msg.chat_id_) and not is_momod(msg.sender_user_id_, msg.chat_id_) then
-        print("Return False [Lock] [Cmd]")
-        return false
-      else
-        ------------------------------------ With Pattern -------------------------------------------
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Pp]ing$") or text:match("^پینگ$") then
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, 'Bot is now Online', 1, 'md')
-            else
+	    if database:get('bot:cmds'..msg.chat_id_) and not is_mod(msg.sender_user_id_, msg.chat_id_) then
+            return ""
+          else
+            ------------------------------------ With Pattern -------------------------------------------
+            if text:match("^[Pp]ing$") then
               send(msg.chat_id_, msg.id_, 1, 'ربات هم اکنون آنلاین میباشد', 1, 'md')
             end
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_admin(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Ll]eave$") or text:match("^ترک گروه$") then
-            chat_leave(msg.chat_id_, bot_id)
-            database:srem("bot:groups",msg.chat_id_)
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('ارتقا مقام','Promote')
-        if text:match("^[Pp]romote$") and is_owner(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ ~= 0  then
-          function promote_by_reply(extra, result, success)
-            local hash = 'bot:momod:'..msg.chat_id_
-            if database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is now a moderator', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' هم اکنون مدیر است !', 1, 'md')
-              end
-            else
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' *promoted* to moderator', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' به مدیریت ارتقا مقام یافت !', 1, 'md')
-              end
-              database:sadd(hash, result.sender_user_id_)
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ll]eave$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
+              chat_leave(msg.chat_id_, bot_id)
             end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,promote_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Pp]romote @(.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-          local ap = {string.match(text, "^([Pp]romote) @(.*)$")}
-          function promote_by_username(extra, result, success)
-            if result.id_ then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User :'..result.id_..' *promoted* to moderator'
-              else
-                texts = '> کاربر با شناسه : '..result.id_..' به مدیریت ارتقا مقام یافت !'
-              end
-              database:sadd('bot:momod:'..msg.chat_id_, result.id_)
-            else
-              if not database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
-          end
-          resolve_username(ap[2],promote_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Pp]romote (%d+)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-          local ap = {string.match(text, "^([Pp]romote) (%d+)$")}
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' *promoted* to moderator', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' به مدیریت ارتقا مقام یافت !', 1, 'md')
-          end
-          database:sadd('bot:momod:'..msg.chat_id_, ap[2])
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('عزل مقام','Demote')
-        if text:match("^[Dd]emote$") and is_owner(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ ~= 0 then
-          function demote_by_reply(extra, result, success)
-            local hash = 'bot:momod:'..msg.chat_id_
-            if not database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is not a moderator !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' مدیر نمیباشد !', 1, 'md')
-              end
-            else
-              database:srem(hash, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' was *removed* from moderator !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' از مدیریت حذف شد !', 1, 'md')
-              end
-            end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,demote_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Dd]emote @(.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-          local hash = 'bot:momod:'..msg.chat_id_
-          local ap = {string.match(text, "^([Dd]emote) @(.*)$")}
-          function demote_by_username(extra, result, success)
-            if result.id_ then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User : '..result.id_..' was demoted'
-              else
-                texts = '> کاربر با شناسه : '..result.id_..' عزل مقام شد'
-              end
-              database:srem(hash, result.id_)
-            else
-              if not database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found !'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
-          end
-          resolve_username(ap[2],demote_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Dd]emote (%d+)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-          local hash = 'bot:momod:'..msg.chat_id_
-          local ap = {string.match(text, "^([Dd]emote) (%d+)$")}
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' was demoted !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' عزل مقام شد !', 1, 'md')
-          end
-          database:srem(hash, ap[2])
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          local text = msg.content_.text_:gsub('ارتقا به عضو ویژه','Setvip')
-          if text:match("^[Ss]etvip$") and msg.reply_to_message_id_ ~= 0  then
-            function promote_by_reply(extra, result, success)
-              local hash = 'bot:vipmem:'..msg.chat_id_
-              if database:sismember(hash, result.sender_user_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is now a VIP member !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' هم اکنون عضو ویژه است !', 1, 'md')
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' *promoted* to VIP member !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' به عضو ویژه ارتقا مقام یافت !', 1, 'md')
-                end
-                database:sadd(hash, result.sender_user_id_)
-              end
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,promote_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Ss]etvip @(.*)$") then
-            local ap = {string.match(text, "^([Ss]etvip) @(.*)$")}
-            function promote_by_username(extra, result, success)
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User :'..result.id_..' *promoted* to VIP member !'
-                else
-                  texts = '> کاربر با شناسه : '..result.id_..' به عضو ویژه ارتقا مقام یافت !'
-                end
-                database:sadd('bot:vipmem:'..msg.chat_id_, result.id_)
-              else
-                if not database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found'
-                else
-                  texts = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
-            end
-            resolve_username(ap[2],promote_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Ss]etvip (%d+)$") then
-            local ap = {string.match(text, "^([Ss]etvip) (%d+)$")}
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' *promoted* to VIP member !', 1, 'md')
-            else
-              send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' به عضو ویژه ارتقا مقام یافت !', 1, 'md')
-            end
-            database:sadd('bot:vipmem:'..msg.chat_id_, ap[2])
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('حذف از عضو ویژه','Demvip')
-          if text:match("^[Dd]emvip$") and msg.reply_to_message_id_ ~= 0 then
-            function demote_by_reply(extra, result, success)
-              local hash = 'bot:vipmem:'..msg.chat_id_
-              if not database:sismember(hash, result.sender_user_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is not a VIP member !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' مدیر نمیباشد !', 1, 'md')
-                end
-              else
-                database:srem(hash, result.sender_user_id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' was *removed* from VIP member !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' از عضو ویژه حذف شد !', 1, 'md')
-                end
-              end
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,demote_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Dd]emvip @(.*)$") then
-            local hash = 'bot:vipmem:'..msg.chat_id_
-            local ap = {string.match(text, "^([Dd]emvip) @(.*)$")}
-            function demote_by_username(extra, result, success)
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User : '..result.id_..' was demoted from VIP member !'
-                else
-                  texts = '> کاربر با شناسه : '..result.id_..' از عضو ویژه حذف شد !'
-                end
-                database:srem(hash, result.id_)
-              else
-                if not database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found !'
-                else
-                  texts = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
-            end
-            resolve_username(ap[2],demote_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Dd]emvip (%d+)$") then
-            local hash = 'bot:vipmem:'..msg.chat_id_
-            local ap = {string.match(text, "^([Dd]emvip) (%d+)$")}
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' was demoted from VIP member !', 1, 'md')
-            else
-              send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' از عضو ویژه شد !', 1, 'md')
-            end
-            database:srem(hash, ap[2])
-          end
-        end
-        -------------------------------------------------------------------------------------------------------
-        if text:match("^[Gg]p id$") or text:match("^شناسه گروه$") then
-          if database:get('lang:gp:'..msg.chat_id_) then
-            texts = "> Group ID : "..msg.chat_id_
-          else
-            texts = "> شناسه گروه : "..msg.chat_id_
-          end
-          send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Mm]y username$") or text:match("^یوزرنیم من$") then
-          function get_username(extra,result,success)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = '> Your Username : {User}'
-            else
-              text = '> یوزرنیم شما : {User}'
-            end
-            local text = text:gsub('{User}',('@'..result.username_ or ''))
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-          getUser(msg.sender_user_id_,get_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Dd]el$") or text:match("^حذف$") and is_sudo(msg) and msg.reply_to_message_id_ ~= 0 then
-            local id = msg.id_
-            local msgs = {[0] = id}
-            delete_msg(msg.chat_id_,{[0] = msg.reply_to_message_id_})
-            delete_msg(msg.chat_id_,msgs)
-          end
-          ----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('مسدود','Ban')
-          if text:match("^[Bb]an$") and msg.reply_to_message_id_ ~= 0 then
-            function ban_by_reply(extra, result, success)
-              local hash = 'bot:banned:'..msg.chat_id_
-              if not is_momod(result.sender_user_id_, result.chat_id_) then
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Pp]romote$") and is_owner(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function promote_by_reply(extra, result, success)
+                local hash = 'bot:mods:'..msg.chat_id_
                 if database:sismember(hash, result.sender_user_id_) then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is already banned !', 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' هم اکنون مسدود است !', 1, 'md')
-                  end
-                  chat_kick(result.chat_id_, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' هم اکنون مدیر است !', 1, 'md')
                 else
                   database:sadd(hash, result.sender_user_id_)
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been banned !', 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' مسدود گردید !', 1, 'md')
-                  end
-                  chat_kick(result.chat_id_, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' به مدیریت ارتقا مقام یافت !', 1, 'md')
                 end
               end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,promote_by_reply)
             end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,ban_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Bb]an @(.*)$") then
-            local ap = {string.match(text, "^([Bb]an) @(.*)$")}
-            function ban_by_username(extra, result, success)
-              if result.id_ then
-                if not is_momod(result.id_, msg.chat_id_) then
-                  database:sadd('bot:banned:'..msg.chat_id_, result.id_)
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    texts = '> User : '..result.id_..' has been banned !'
-                  else
-                    texts = '> کاربر با شناسه : '..result.id_..' مسدود گردید !'
-                  end
-                  chat_kick(msg.chat_id_, result.id_)
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found'
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Pp]romote @(.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Pp]romote) @(.*)$")}
+              function promote_by_username(extra, result, success)
+                if result.id_ then
+                  database:sadd('bot:mods:'..msg.chat_id_, result.id_)
+                  texts = '👤 کاربر با شناسه : '..result.id_..' به مدیریت ارتقا مقام یافت !'
                 else
-                  texts = '> کاربر یافت نشد !'
+                  texts = 'کاربر یافت نشد ❌'
                 end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
               end
-              send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              resolve_username(ap[2],promote_by_username)
             end
-            resolve_username(ap[2],ban_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Bb]an (%d+)$") then
-            local ap = {string.match(text, "^([Bb]an) (%d+)$")}
-            if not is_momod(ap[2], msg.chat_id_) then
-              database:sadd('bot:banned:'..msg.chat_id_, ap[2])
-              chat_kick(msg.chat_id_, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been banned !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' مسدود گردید !', 1, 'md')
-              end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Pp]romote (%d+)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Pp]romote) (%d+)$")}
+              database:sadd('bot:mods:'..msg.chat_id_, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..ap[2]..' به مدیریت ارتقا مقام یافت !', 1, 'md')
             end
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('حذف کلی پیام','Delall')
-          if text:match("^[Dd]elall$") and msg.reply_to_message_id_ ~= 0 then
-            function delall_by_reply(extra, result, success)
-              del_all_msgs(result.chat_id_, result.sender_user_id_)
-              local id = msg.id_
-              local msgs = {[0] = id}
-              local chat = msg.chat_id_
-              delete_msg(chat,msgs)
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,delall_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Dd]elall (%d+)$") then
-            local ass = {string.match(text, "^([Dd]elall) (%d+)$")}
-            if not ass then
-              return false
-            else
-              del_all_msgs(msg.chat_id_, ass[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> All messages from User : '..ass[2]..' has been deleted !', 1, 'html')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> تمامی پیام های ارسالی کاربر با شناسه : '..ass[2]..' حذف شد !', 1, 'html')
-              end
-            end
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Dd]elall @(.*)$") then
-            local ap = {string.match(text, "^([Dd]elall) @(.*)$")}
-            function delall_by_username(extra, result, success)
-              if result.id_ then
-                del_all_msgs(msg.chat_id_, result.id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> All messages from User : '..result.id_..' has been deleted !'
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emote$") and is_owner(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function demote_by_reply(extra, result, success)
+                local hash = 'bot:mods:'..msg.chat_id_
+                if not database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' از مدیر نمیباشد !', 1, 'md')
                 else
-                  text = '> تمامی پیام های ارسالی کاربر با شناسه : '..result.id_..' حذف شد !'
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User not found !'
-                else
-                  text = '> کاربر یافت نشد !'
+                  database:srem(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' از مدیریت حذف شد !', 1, 'md')
                 end
               end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,demote_by_reply)
             end
-            resolve_username(ap[2],delall_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('آزاد کردن','Unban')
-          if text:match("^[Uu]nban$") and msg.reply_to_message_id_ ~= 0 then
-            function unban_by_reply(extra, result, success)
-              local hash = 'bot:banned:'..msg.chat_id_
-              if not database:sismember(hash, result.sender_user_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is not banned !', 1, 'md')
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emote @(.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local hash = 'bot:mods:'..msg.chat_id_
+              local ap = {string.match(text, "^([Dd]emote) @(.*)$")}
+              function demote_by_username(extra, result, success)
+                if result.id_ then
+                  database:srem(hash, result.id_)
+                  texts = '👤 کاربر با شناسه : '..result.id_..' عزل مقام شد'
                 else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' مسدود نیست !', 1, 'md')
+                  texts = 'کاربر یافت نشد ❌'
                 end
-              else
-                database:srem(hash, result.sender_user_id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been unbanned !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' آزاد شد !', 1, 'md')
-                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
               end
+              resolve_username(ap[2],demote_by_username)
             end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,unban_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nban @(.*)$") then
-            local ap = {string.match(text, "^([Uu]nban) @(.*)$")}
-            function unban_by_username(extra, result, success)
-              if result.id_ then
-                if not database:sismember('bot:banned:'..msg.chat_id_, result.id_) then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, '> User : '..result.id_..' is not banned !', 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.id_..' مسدود نیست !', 1, 'md')
-                  end
-                else
-                  database:srem('bot:banned:'..msg.chat_id_, result.id_)
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> User : '..result.id_..' has been unbanned !'
-                  else
-                    text = '> کاربر با شناسه : '..result.id_..' آزاد شد !'
-                  end
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User not found !'
-                else
-                  text = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(ap[2],unban_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nban (%d+)$") then
-            local ap = {string.match(text, "^([Uu]nban) (%d+)$")}
-            if not database:sismember('bot:banned:'..msg.chat_id_, ap[2]) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' is not banned !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' مسدود نیست !', 1, 'md')
-              end
-            else
-              database:srem('bot:banned:'..msg.chat_id_, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been unbanned !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' آزاد شد !', 1, 'md')
-              end
-            end
-          end
-          ---------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('مسدودسازی','Banall')
-          if text:match("^[Bb]anall$") and is_sudo(msg) and msg.reply_to_message_id_ then
-            function gban_by_reply(extra, result, success)
-              local hash = 'bot:gban:'
-              database:sadd(hash, result.sender_user_id_)
-              chat_kick(result.chat_id_, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been globaly banned !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' به طور کلی مسدود سازی گردید !', 1, 'md')
-              end
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,gban_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Bb]anall @(.*)$") and is_sudo(msg) then
-            local aps = {string.match(text, "^([Bb]anall) @(.*)$")}
-            function gban_by_username(extra, result, success)
-              local hash = 'bot:gban:'
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User : '..result.id_..' has been globaly banned !'
-                else
-                  text = '> کاربر با شناسه : '..result.id_..' به صورت کلی مسدود گردید !'
-                end
-                database:sadd(hash, result.id_)
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User not found !'
-                else
-                  text = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(aps[2],gban_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Bb]anall (%d+)$") and is_sudo(msg) then
-            local ap = {string.match(text, "^([Bb]anall) (%d+)$")}
-            local hash = 'bot:gban:'
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been globaly banned !', 1, 'md')
-            else
-              send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' به صورت کلی مسدود گردید !', 1, 'md')
-            end
-            database:set('bot:gban:'..ap[2],true)
-            database:sadd(hash, ap[2])
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('آزادسازی','unbanall')
-          if text:match("^[Uu]nbanall$") and is_sudo(msg) and msg.reply_to_message_id_ then
-            function ungban_by_reply(extra, result, success)
-              local hash = 'bot:gban:'
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been unbanned (Gban)!', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' آزادسازی شد !', 1, 'md')
-              end
-              database:srem(hash, result.sender_user_id_)
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,ungban_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nbanall @(.*)$") and is_sudo(msg) then
-            local apid = {string.match(text, "^([Uu]nbanall) @(.*)$")}
-            function ungban_by_username(extra, result, success)
-              local hash = 'bot:gban:'
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User : '..result.id_..' has been unbanned (Gban) !'
-                else
-                  text = '> کاربر با شناسه : '..result.id_..' از لیست مسدودیت ربات آزاد شد !'
-                end
-                database:srem(hash, result.id_)
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User not found !'
-                else
-                  text = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(apid[2],ungban_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nbanall (%d+)$") and is_sudo(msg) then
-            local ap = {string.match(text, "^([Uu]nbanall) (%d+)$")}
-            local hash = 'bot:gban:'
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emote (%d+)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local hash = 'bot:mods:'..msg.chat_id_
+              local ap = {string.match(text, "^([Dd]emote) (%d+)$")}
               database:srem(hash, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been unbanned !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' آزادسازی شد !', 1, 'md')
-              end
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..ap[2]..' عزل مقام شد !', 1, 'md')
             end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('بی صدا','Muteuser')
-          if text:match("^[Mm]uteuser$") and msg.reply_to_message_id_ ~= 0 then
-            function mute_by_reply(extra, result, success)
-              local hash = 'bot:muted:'..msg.chat_id_
-              if database:sismember(hash, result.sender_user_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is already muted !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' هم اکنون بی صدا است !', 1, 'md')
-                end
-              else
-                database:sadd(hash, result.sender_user_id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been muted !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' بی صدا گردید !', 1, 'md')
-                end
-              end
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,mute_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Mm]uteuser @(.*)$") then
-            local ap = {string.match(text, "^([Mm]uteuser) @(.*)$")}
-            function mute_by_username(extra, result, success)
-              if result.id_ then
-                database:sadd('bot:muted:'..msg.chat_id_, result.id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User : '..result.id_..' has been muted !'
-                else
-                  texts = '> کاربر با شناسه : '..result.id_..' بی صدا گردید !'
-                end
-                chat_kick(msg.chat_id_, result.id_)
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found !'
-                else
-                  texts = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-            end
-            resolve_username(ap[2],mute_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Mm]uteuser (%d+)$") then
-            local ap = {string.match(text, "^([Mm]uteuser) (%d+)$")}
-            if database:sismember('bot:muted:'..msg.chat_id_, ap[2]) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' is already muted !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' هم اکنون بی صدا است !', 1, 'md')
-              end
-            else
-              database:sadd('bot:muted:'..msg.chat_id_, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been muted !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' بی صدا گردید !', 1, 'md')
-              end
-            end
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('حذف بی صدا','Unmuteuser')
-          if text:match("^[Uu]nmuteuser$") and msg.reply_to_message_id_ ~= 0 then
-            function unmute_by_reply(extra, result, success)
-              local hash = 'bot:muted:'..msg.chat_id_
-              if not database:sismember(hash, result.sender_user_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' not muted !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' بی صدا نیست !', 1, 'md')
-                end
-              else
-                database:srem(hash, result.sender_user_id_)
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been unmuted !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' از حالت بی صدا خارج گردید !', 1, 'md')
-                end
-              end
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,unmute_by_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nmuteuser @(.*)$") then
-            local ap = {string.match(text, "^([Uu]nmuteuser) @(.*)$")}
-            function unmute_by_username(extra, result, success)
-              if result.id_ then
-                if not database:sismember('bot:muted:'..msg.chat_id_, result.id_) then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, '> User : '..result.id_..' is not muted !', 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.id_..' بی صدا نیست !', 1, 'md')
-                  end
-                else
-                  database:srem('bot:muted:'..msg.chat_id_, result.id_)
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> User : '..result.id_..' has been unmuted !'
-                  else
-                    text = '> کاربر با شناسه : '..result.id_..' از حالت بی صدا خارج گردید !'
-                  end
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> User not found !'
-                else
-                  text = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(ap[2],unmute_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Uu]nmuteuser (%d+)$") then
-            local ap = {string.match(text, "^([Uu]nmuteuser) (%d+)$")}
-            if not database:sismember('bot:muted:'..msg.chat_id_, ap[2]) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' is not muted !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' بی صدا نیست !', 1, 'md')
-              end
-            else
-              database:srem('bot:muted:'..msg.chat_id_, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been unmuted !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' از حالت بی صدا خارج گردید !', 1, 'md')
-              end
-            end
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('ارتقا به صاحب گروه','Setowner')
-        if text:match("^[Ss]etowner$") and is_admin(msg.sender_user_id_) and msg.reply_to_message_id_ ~= 0 then
-          function setowner_by_reply(extra, result, success)
-            local hash = 'bot:owners:'..msg.chat_id_
-            if database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر '..result.sender_user_id_..' هم اکنون صاحب گروه میباشد !', 1, 'md')
-              end
-            else
-              database:sadd(hash, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' added to owner list !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر '..result.sender_user_id_..' به عنوان صاحب گروه انتخاب شد !', 1, 'md')
-              end
-            end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,setowner_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Ss]etowner @(.*)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
-          local ap = {string.match(text, "^([Ss]etowner) @(.*)$")}
-          function setowner_by_username(extra, result, success)
-            if result.id_ then
-              database:sadd('bot:owners:'..msg.chat_id_, result.id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User : '..result.id_..' added to owner list !'
-              else
-                texts = '> کاربر '..result.id_..' به عنوان صاحب گروه انتخاب شد !'
-              end
-            else
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found !'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-          end
-          resolve_username(ap[2],setowner_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Ss]etowner (%d+)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
-          local ap = {string.match(text, "^([Ss]etowner) (%d+)$")}
-          database:sadd('bot:owners:'..msg.chat_id_, ap[2])
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' added to owner list !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر '..ap[2]..' به عنوان صاحب گروه انتخاب شد !', 1, 'md')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('حذف از صاحب گروه','Demowner')
-        if text:match("^[Dd]emowner$") and is_admin(msg.sender_user_id_) and msg.reply_to_message_id_ ~= 0 then
-          function deowner_by_reply(extra, result, success)
-            local hash = 'bot:owners:'..msg.chat_id_
-            if not database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is not a owner !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' صاحب گروه نیست !', 1, 'md')
-              end
-            else
-              database:srem(hash, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' removed from owner list !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' از مقام صاحب گروه حذف شد !', 1, 'md')
-              end
-            end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,deowner_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Dd]emowner @(.*)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
-          local hash = 'bot:owners:'..msg.chat_id_
-          local ap = {string.match(text, "^([Dd]emowner) @(.*)$")}
-          function remowner_by_username(extra, result, success)
-            if result.id_ then
-              database:srem(hash, result.id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User : '..result.id_..' removed from owner list !'
-              else
-                texts = '> کاربر : '..result.id_..' از مقام صاحب گروه حذف شد !'
-              end
-            else
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found !'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-          end
-          resolve_username(ap[2],remowner_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Dd]emowner (%d+)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
-          local hash = 'bot:owners:'..msg.chat_id_
-          local ap = {string.match(text, "^([Dd]emowner) (%d+)$")}
-          database:srem(hash, ap[2])
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' removed from owner list !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر : '..ap[2]..' از مقام صاحب گروه حذف شد !', 1, 'md')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('ارتقا به ادمین ربات','Addadmin')
-        if text:match("^[Aa]ddadmin$") and is_sudo(msg) and msg.reply_to_message_id_ ~= 0 then
-          function addadmin_by_reply(extra, result, success)
-            local hash = 'bot:admins:'
-            if database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is already admin !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' هم اکنون ادمین است !', 1, 'md')
-              end
-            else
-              database:sadd(hash, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' added to admin list !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' به ادمین ها اضافه شد !', 1, 'md')
-              end
-            end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,addadmin_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Aa]ddadmin @(.*)$") and is_sudo(msg) then
-          local ap = {string.match(text, "^([Aa]ddadmin) @(.*)$")}
-          function addadmin_by_username(extra, result, success)
-            if result.id_ then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User : '..result.id_..' added to admin list !'
-              else
-                texts = '> کاربر : '..result.id_..' به ادمین ها اضافه شد !'
-              end
-              database:sadd('bot:admins:', result.id_)
-            else
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found !'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-          end
-          resolve_username(ap[2],addadmin_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Aa]ddadmin (%d+)$") and is_sudo(msg) then
-          local ap = {string.match(text, "^([Aa]ddadmin) (%d+)$")}
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' added to admin list !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر : '..ap[2]..' به ادمین ها اضافه شد !', 1, 'md')
-          end
-          database:sadd('bot:admins:', ap[2])
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('حذف از ادمین ربات','Remadmin')
-        if text:match("^[Rr]emadmin$") and is_sudo(msg) and msg.reply_to_message_id_ ~= 0 then
-          function deadmin_by_reply(extra, result, success)
-            local hash = 'bot:admins:'
-            if not database:sismember(hash, result.sender_user_id_) then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' is not admin !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' ادمین نیست !', 1, 'md')
-              end
-            else
-              database:srem(hash, result.sender_user_id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' removed from admin list !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر : '..result.sender_user_id_..' از ادمینی حذف شد !', 1, 'md')
-              end
-            end
-          end
-          getMessage(msg.chat_id_, msg.reply_to_message_id_,deadmin_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Rr]emadmin @(.*)$") and is_sudo(msg) then
-          local hash = 'bot:admins:'
-          local ap = {string.match(text, "^([Rr]emadmin) @(.*)$")}
-          function remadmin_by_username(extra, result, success)
-            if result.id_ then
-              database:srem(hash, result.id_)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User : '..result.id_..' removed from admin list !'
-              else
-                texts = '> کاربر : '..result.id_..' از ادمینی حذف شد !'
-              end
-            else
-              if database:get('lang:gp:'..msg.chat_id_) then
-                texts = '> User not found !'
-              else
-                texts = '> کاربر یافت نشد !'
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-          end
-          resolve_username(ap[2],remadmin_by_username)
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Rr]emadmin (%d+)$") and is_sudo(msg) then
-          local hash = 'bot:admins:'
-          local ap = {string.match(text, "^([Rr]emadmin) (%d+)$")}
-          database:srem(hash, ap[2])
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' removed from admin list !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> کاربر : '..ap[2]..' از ادمینی حذف شد !', 1, 'md')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Mm]odlist$") or text:match("^لیست مدیران گروه$") then
-            local hash =  'bot:momod:'..msg.chat_id_
-            local list = database:smembers(hash)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of moderator : \n\n"
-            else
-              text = "> لیست مدیران گروه : \n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> List of moderator is empty !"
-              else
-                text = "> لیست مدیران خالی است !"
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-          ---------------------------------------------------------------------------
-          if text:match("^[Vv]iplist$") or text:match("^لیست عضو های ویژه$") then
-            local hash =  'bot:vipmem:'..msg.chat_id_
-            local list = database:smembers(hash)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of VIP Members : \n\n"
-            else
-              text = "> لیست عضو های ویژه :\n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> List of VIP members is empty !"
-              else
-                text = "> لیست عضو های ویژه خالی است !"
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Mm]utelist$") or text:match("^لیست افراد بی صدا$") then
-            local hash =  'bot:muted:'..msg.chat_id_
-            local list = database:smembers(hash)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of muted users : \n\n"
-            else
-              text = "> لیست افراد بی صدا : \n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> List of muted users is empty ! "
-              else
-                text = "> لیست افراد بی صدا خالی است ! "
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Oo]wner$") or text:match("^[Oo]wnerlist$") or text:match("^لیست صاحب گروهان$") then
-            local hash =  'bot:owners:'..msg.chat_id_
-            local list = database:smembers(hash)
-            if not database:get('lang:gp:'..msg.chat_id_) then
-              text = "> لیست صاحبان گروه : \n\n"
-            else
-              text = "> Owners list : \n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> Owner list is empty !"
-              else
-                text = "> لیست صاحبان گروه خالی است !"
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Bb]anlist$") or text:match("^لیست افراد مسدود$") then
-            local hash =  'bot:banned:'..msg.chat_id_
-            local list = database:smembers(hash)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of banlist : \n\n"
-            else
-              text = "> لیست افراد مسدود شده : \n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> list of banlist is empty !"
-              else
-                text = "> لیست افراد مسدود شده خالی است !"
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_sudo(msg) then
-          if text:match("^[Bb]analllist$") or text:match("^لیست افراد تحت مسدودیت$") then
-            local hash =  'bot:gban:'
-            local list = database:smembers(hash)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of banlist : \n\n"
-            else
-              text = "> لیست افراد تحت مسدودیت : \n\n"
-            end
-            for k,v in pairs(list) do
-              local user_info = database:hgetall('user:'..v)
-              if user_info and user_info.username then
-                local username = user_info.username
-                text = text..k.." - @"..username.." ["..v.."]\n"
-              else
-                text = text..k.." - "..v.."\n"
-              end
-            end
-            if #list == 0 then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = "> list of banalllist is empty !"
-              else
-                text = "> لیست افراد تحت مسدودیت شده خالی است !"
-              end
-            end
-            send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Aa]dminlist$") or text:match("^لیست ادمین های ربات$") and is_leader(msg) then
-          local hash =  'bot:admins:'
-          local list = database:smembers(hash)
-          if database:get('lang:gp:'..msg.chat_id_) then
-            text = "> List of admins :\n\n"
-          else
-            text = "> لیست ادمین ها :\n\n"
-          end
-          for k,v in pairs(list) do
-            local user_info = database:hgetall('user:'..v)
-            if user_info and user_info.username then
-              local username = user_info.username
-              text = text..k.." - @"..username.." ["..v.."]\n"
-            else
-              text = text..k.." - "..v.."\n"
-            end
-          end
-          if #list == 0 then
-            if database:get('lang:gp:'..msg.chat_id_) then
-              text = "> List of admins is empty !"
-            else
-              text = "> لیست ادمین ها خالی است !"
-            end
-          end
-          send(msg.chat_id_, msg.id_, 1, text, 'html')
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Gg]etid$") or text:match("^دریافت شناسه$") and msg.reply_to_message_id_ ~= 0 then
-          function id_by_reply(extra, result, success)
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, "> User ID : "..result.sender_user_id_, 1, 'md')
-            else
-              send(msg.chat_id_, msg.id_, 1, "> شناسه کاربر : "..result.sender_user_id_, 1, 'md')
-            end
-          end
-          getMessage(msg.chat_id_,msg.reply_to_message_id_,id_by_reply)
-        end
-        -----------------------------------------------------------------------------------------------
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Ii]d @(.*)$") then
-            local ap = {string.match(text, "^([Ii]d) @(.*)$")}
-            function id_by_username(extra, result, success)
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  if tonumber(result.id_) == tonumber(bot_owner) then
-                    t = 'Chief'
-                  elseif is_sudoid(result.id_) then
-                    t = 'Sudo'
-                  elseif is_admin(result.id_) then
-                    t = 'Bot Admin'
-                  elseif is_owner(result.id_, msg.chat_id_) then
-                    t = 'Owner'
-                  elseif is_momod(result.id_, msg.chat_id_) then
-                    t = 'Group Admin'
-                  elseif result.id_ == bot_id then
-                    t = 'Myself'
-                  else
-                    t = 'Member'
-                  end
-                end
-                if not database:get('lang:gp:'..msg.chat_id_) then
-                  if tonumber(result.id_) == tonumber(bot_owner) then
-                    t = 'مدیر کل'
-                  elseif is_sudoid(result.id_) then
-                    t = 'مدیر ربات'
-                  elseif is_admin(result.id_) then
-                    t = 'ادمین ربات'
-                  elseif is_owner(result.id_, msg.chat_id_) then
-                    t = 'صاحب گروه'
-                  elseif is_momod(result.id_, msg.chat_id_) then
-                    t = 'مدیر گروه'
-                  elseif result.id_ == bot_id then
-                    t = 'خودم'
-                  else
-                    t = 'کاربر'
-                  end
-                end
-                local gpid = tostring(result.id_)
-                if gpid:match('^(%d+)') then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> Username : @'..ap[2]..'\n> ID : ('..result.id_..')\n> Rank : '..t
-                  else
-                    text = '> یوزرنیم : @'..ap[2]..'\n> شناسه : ('..result.id_..')\n> مقام : '..t
-                  end
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> Username : @'..ap[2]..'\n> ID : ('..result.id_..')'
-                  else
-                    text = '> یوزرنیم : @'..ap[2]..'\n> شناسه : ('..result.id_..')'
-                  end
-                end
-              end
-              if not result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> Username is not correct ! '
-                else
-                  text = '> یوزنیم صحیح نمیباشد  ! '
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(ap[2],id_by_username)
-          end
-          if text:match("^آیدی @(.*)$") then
-            local ap = {string.match(text, "^(آیدی) @(.*)$")}
-            function id_by_username(extra, result, success)
-              if result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  if tonumber(result.id_) == tonumber(bot_owner) then
-                    t = 'Chief'
-                  elseif is_sudoid(result.id_) then
-                    t = 'Sudo'
-                  elseif is_admin(result.id_) then
-                    t = 'Bot Admin'
-                  elseif is_owner(result.id_, msg.chat_id_) then
-                    t = 'Owner'
-                  elseif is_momod(result.id_, msg.chat_id_) then
-                    t = 'Group Admin'
-                  elseif result.id_ == bot_id then
-                    t = 'Myself'
-                  else
-                    t = 'Member'
-                  end
-                end
-                if not database:get('lang:gp:'..msg.chat_id_) then
-                  if tonumber(result.id_) == tonumber(bot_owner) then
-                    t = 'مدیر کل'
-                  elseif is_sudoid(result.id_) then
-                    t = 'مدیر ربات'
-                  elseif is_admin(result.id_) then
-                    t = 'ادمین ربات'
-                  elseif is_owner(result.id_, msg.chat_id_) then
-                    t = 'صاحب گروه'
-                  elseif is_momod(result.id_, msg.chat_id_) then
-                    t = 'مدیر گروه'
-                  elseif result.id_ == bot_id then
-                    t = 'خودم'
-                  else
-                    t = 'کاربر'
-                  end
-                end
-                local gpid = tostring(result.id_)
-                if gpid:match('^(%d+)') then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> Username : @'..ap[2]..'\n> ID : ('..result.id_..')\n> Rank : '..t
-                  else
-                    text = '> یوزرنیم : @'..ap[2]..'\n> شناسه : ('..result.id_..')\n> مقام : '..t
-                  end
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    text = '> Username : @'..ap[2]..'\n> ID : ('..result.id_..')'
-                  else
-                    text = '> یوزرنیم : @'..ap[2]..'\n> شناسه : ('..result.id_..')'
-                  end
-                end
-              end
-              if not result.id_ then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = '> Username is not correct ! '
-                else
-                  text = '> یوزنیم صحیح نمیباشد  ! '
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
-            end
-            resolve_username(ap[2],id_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('اخراج','Kick')
-          if text:match("^[Kk]ick$") and msg.reply_to_message_id_ ~= 0 then
-            function kick_reply(extra, result, success)
-              if not is_momod(result.sender_user_id_, result.chat_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> User : '..result.sender_user_id_..' has been kicked !', 1, 'html')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..result.sender_user_id_..' اخراج شد !', 1, 'html')
-                end
-                chat_kick(result.chat_id_, result.sender_user_id_)
-              end
-            end
-            getMessage(msg.chat_id_,msg.reply_to_message_id_,kick_reply)
-          end
-          ---------------------------------------------------------
-          if text:match("^[Kk]ick @(.*)$") then
-            local ap = {string.match(text, "^([Kk]ick) @(.*)$")}
-            function ban_by_username(extra, result, success)
-              if result.id_ then
-                if not is_momod(result.id_, msg.chat_id_) then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    texts = '> User : '..result.id_..' has been kicked !'
-                  else
-                    texts = '> کاربر با شناسه : '..result.id_..' اخراج گردید !'
-                  end
-                  chat_kick(msg.chat_id_, result.id_)
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found'
-                else
-                  texts = '> کاربر یافت نشد !'
-                end
-              end
-              send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
-            end
-            resolve_username(ap[2],ban_by_username)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Kk]ick (%d+)$") then
-            local ap = {string.match(text, "^([Kk]ick) (%d+)$")}
-            if not is_momod(ap[2], msg.chat_id_) then
-              chat_kick(msg.chat_id_, ap[2])
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, '> User : '..ap[2]..' has been kicked !', 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, '> کاربر با شناسه : '..ap[2]..' اخراج گردید !', 1, 'md')
-              end
-            end
-          end
-          ----------------------------------------------------------------------------------------------
-          if text:match("^[Ff]ilterlist$") or text:match("^لیست فیلتر$") then
-            local hash = 'bot:filters:'..msg.chat_id_
-            if hash then
-              local names = database:hkeys(hash)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = '> Filterlist : \n\n'
-              else
-                text = '> لیست کلمات فیلتر شده : \n\n'
-              end
-              for i=1, #names do
-                text = text..'> '..names[i]..'\n'
-              end
-              if #names == 0 then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = "> Filterlist is empty !"
-                else
-                  text = "> لیست کلمات فیلتر شده خالی است !"
-                end
-              end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Gg]p id$") then
+              local text = "🔹شناسه گروه : "..msg.chat_id_
               send(msg.chat_id_, msg.id_, 1, text, 1, 'md')
             end
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Ff]reelist$") or text:match("^لیست مجاز$") then
-            local hash = 'bot:freewords:'..msg.chat_id_
-            if hash then
-              local names = database:hkeys(hash)
-              if database:get('lang:gp:'..msg.chat_id_) then
-                text = '> Freelist : \n\n'
-              else
-                text = '> لیست عنوان های مجاز : \n\n'
-              end
-              for i=1, #names do
-                text = text..'> '..names[i]..'\n'
-              end
-              if #names == 0 then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  text = "> Freelist is empty !"
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]y id$") then
+              local text = "🔹شناسه شما  : "..msg.sender_user_id_
+              send(msg.chat_id_, msg.id_, 1, text, 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+
+            if text:match("^[Dd]el$") and is_sudo(msg) and msg.reply_to_message_id_ ~= 0 then
+              local id = msg.id_
+              local msgs = {[0] = id}
+              delete_msg(msg.chat_id_,{[0] = msg.reply_to_message_id_})
+              delete_msg(msg.chat_id_,msgs)
+            end
+            ----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]an$") and is_mod(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function ban_by_reply(extra, result, success)
+                local hash = 'bot:banned:'..msg.chat_id_
+                if is_mod(result.sender_user_id_, result.chat_id_) then
+                  send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
                 else
-                  text = "> لیست عنوان های مجاز خالی است !"
+                  if database:sismember(hash, result.sender_user_id_) then
+                    send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' هم اکنون مسدود است !', 1, 'md')
+                    chat_kick(result.chat_id_, result.sender_user_id_)
+                  else
+                    database:sadd(hash, result.sender_user_id_)
+                    send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' مسدود گردید !', 1, 'md')
+                    chat_kick(result.chat_id_, result.sender_user_id_)
+                  end
                 end
               end
-              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,ban_by_reply)
             end
-          end
-          -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('اینوایت','Invite')
-          if text:match("^[Ii]nvite$") and msg.reply_to_message_id_ ~= 0 then
-            function inv_reply(extra, result, success)
-              add_user(result.chat_id_, result.sender_user_id_, 5)
-            end
-            getMessage(msg.chat_id_, msg.reply_to_message_id_,inv_reply)
-          end
-          -----------------------------------------------------------------------------------------------
-          if text:match("^[Ii]nvite @(.*)$") then
-            local ap = {string.match(text, "^([Ii]nvite) @(.*)$")}
-            function invite_by_username(extra, result, success)
-              if result.id_ then
-                add_user(msg.chat_id_, result.id_, 5)
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  texts = '> User not found !'
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]an @(.*)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Bb]an) @(.*)$")}
+              function ban_by_username(extra, result, success)
+                if result.id_ then
+                  if is_mod(result.id_, msg.chat_id_) then
+                    send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
+                  else
+                    database:sadd('bot:banned:'..msg.chat_id_, result.id_)
+                    texts = '👤 کاربر با شناسه : '..result.id_..' مسدود گردید !'
+                    chat_kick(msg.chat_id_, result.id_)
+                  end
                 else
                   texts = '> کاربر یافت نشد !'
                 end
                 send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
               end
+              resolve_username(ap[2],ban_by_username)
             end
-            resolve_username(ap[2],invite_by_username)
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Ii]nvite (%d+)$") then
-          local ap = {string.match(text, "^([Ii]nvite) (%d+)$")}
-          add_user(msg.chat_id_, ap[2], 5)
-        end
-        -----------------------------------------------------------------------------------------------
-        if msg.reply_to_message_id_ ~= 0 then
-          return ""
-        else
-          if text:match("^[Ii]d$") then
-            local user_msgs = database:get('user:msgs'..msg.chat_id_..':'..msg.sender_user_id_)
-            local function getproen(extra, result, success)
-              if database:get('getidstatus'..msg.chat_id_) == "Photo" then
-                if result.photos_[0] then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_,'> Your ID : '..msg.sender_user_id_..'\n> Number of messages : '..user_msgs,msg.id_,msg.id_)
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]an (%d+)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Bb]an) (%d+)$")}
+              if is_mod(ap[2], msg.chat_id_) then
+                send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
+              else
+                database:sadd('bot:banned:'..msg.chat_id_, ap[2])
+                chat_kick(msg.chat_id_, ap[2])
+                send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..ap[2]..' مسدود گردید !', 1, 'md')
+              end
+            end
+            ---------------------------------------Ban ALL-------------------------------------------------
+            if text:match("^[Bb]anall$") and is_sudo(msg) and msg.reply_to_message_id_ then
+              function ban_by_reply(extra, result, success)
+                local hash = 'bot:gbanned:'
+                if is_mod(result.sender_user_id_, result.chat_id_) then
+                  send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
+                else
+                  if database:sismember(hash, result.sender_user_id_) then
+                    send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' هم اکنون به صورت کلی مسدود است !', 1, 'md')
+                    chat_kick(result.chat_id_, result.sender_user_id_)
                   else
-                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_,'> شناسه شما : '..msg.sender_user_id_..'\n> تعداد پیام های ارسالی شما : '..user_msgs,msg.id_,msg.id_)
+                    database:sadd(hash, result.sender_user_id_)
+                    send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' به طور کلی مسدود سازی گردید !', 1, 'md')
+                    chat_kick(result.chat_id_, result.sender_user_id_)
+                  end
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,ban_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]anall @(.*)$") and is_sudo(msg) then
+              local ap = {string.match(text, "^([Bb]anall) @(.*)$")}
+              function ban_by_username(extra, result, success)
+                if result.id_ then
+                  if is_mod(result.id_, msg.chat_id_) then
+                    send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
+                  else
+                    database:sadd('bot:gbanned:',result.id_)
+                    chat_kick(msg.chat_id_, result.id_)
+                    texts = '👤 کاربر با شناسه : '..result.id_..' به صورت کلی مسدود گردید !'
+                    chat_kick(msg.chat_id_, result.id_)
                   end
                 else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "> You don't have profile photo !\n\n> Your ID : "..msg.sender_user_id_.."\n> Number of messages  : "..user_msgs, 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "> شما عکس پروفایل ندارید !\n\n> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
+                  texts = '> کاربر یافت نشد !'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],ban_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]anall (%d+)$") and is_sudo(msg) then
+              local ap = {string.match(text, "^([Bb]anall) (%d+)$")}
+              if is_mod(ap[2], msg.chat_id_) then
+                send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را مسدود کنید !', 1, 'md')
+              else
+                database:sadd('bot:gbanned:',ap[2])
+                send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..ap[2]..' به صورت کلی مسدود گردید !', 1, 'md')
+              end
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]elall$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              if msg.reply_to_message_id_ then
+                function delall_by_reply(extra, result, success)
+                  del_all_msgs(result.chat_id_, result.sender_user_id_)
+                  local id = msg.id_
+                  local msgs = {[0] = id}
+                  local chat = msg.chat_id_
+                  delete_msg(chat,msgs)
+                end
+                getMessage(msg.chat_id_, msg.reply_to_message_id_,delall_by_reply)
+              end
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]elall (%d+)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local ass = {string.match(text, "^([Dd]elall) (%d+)$")}
+              if is_mod(ass[2], msg.chat_id_) then
+                send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید پیام مدیران را حذف کنید ❌', 1, 'md')
+              else
+                del_all_msgs(msg.chat_id_, ass[2])
+                send(msg.chat_id_, msg.id_, 1, 'تمامی پیام های ارسالی کاربر با شناسه : '..ass[2]..' حذف شد 🗑', 1, 'html')
+              end
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]elall @(.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Dd]elall) @(.*)$")}
+              function delall_by_username(extra, result, success)
+                if result.id_ then
+                  if is_mod(result.id_, msg.chat_id_) then
+                    send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید پیام مدیران را حذف کنید ❌', 1, 'md')
+                    return false
                   end
+                  del_all_msgs(msg.chat_id_, result.id_)
+                  text = 'تمامی پیام های ارسالی کاربر با شناسه : '..result.id_..' حذف شد 🗑'
+                else
+                  text = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+              end
+              resolve_username(ap[2],delall_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nban$") and is_mod(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function unban_by_reply(extra, result, success)
+                local hash = 'bot:banned:'..msg.chat_id_
+                if not database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' مسدود نیست !', 1, 'md')
+                else
+                  database:srem(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..result.sender_user_id_..' آزاد شد !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,unban_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nban @(.*)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Uu]nban) @(.*)$")}
+              function unban_by_username(extra, result, success)
+                if result.id_ then
+                  database:srem('bot:banned:'..msg.chat_id_, result.id_)
+                  text = '👤 کاربر با شناسه : '..result.id_..' آزاد شد !'
+                else
+                  text = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+              end
+              resolve_username(ap[2],unban_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nban (%d+)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Uu]nban) (%d+)$")}
+              database:srem('bot:banned:'..msg.chat_id_, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر با شناسه : '..ap[2]..' آزاد شد !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]uteuser$") and is_mod(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function mute_by_reply(extra, result, success)
+                local hash = 'bot:muted:'..msg.chat_id_
+                if is_mod(result.sender_user_id_, result.chat_id_) then
+                  send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را بی صدا کنید ❌', 1, 'md')
+                else
+                  if database:sismember(hash, result.sender_user_id_) then
+                    send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' هم اکنون بی صدا است !', 1, 'md')
+                  else
+                    database:sadd(hash, result.sender_user_id_)
+                    send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' بی صدا گردید !', 1, 'md')
+                  end
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,mute_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]uteuser @(.*)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Mm]uteuser) @(.*)$")}
+              function mute_by_username(extra, result, success)
+                if result.id_ then
+                  if is_mod(result.id_, msg.chat_id_) then
+                    send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را بی صدا کنید ❌', 1, 'md')
+                  else
+                    database:sadd('bot:muted:'..msg.chat_id_, result.id_)
+                    texts = '👤کاربر با شناسه : '..result.id_..' بی صدا گردید !'
+                    chat_kick(msg.chat_id_, result.id_)
+                  end
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],mute_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]uteuser (%d+)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Mm]uteuser) (%d+)$")}
+              if is_mod(ap[2], msg.chat_id_) then
+                send(msg.chat_id_, msg.id_, 1, 'شما نمیتوانید مدیران را بی صدا کنید ❌', 1, 'md')
+              else
+                database:sadd('bot:muted:'..msg.chat_id_, ap[2])
+                send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..ap[2]..' بی صدا گردید !', 1, 'md')
+              end
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nmuteuser$") and is_mod(msg.sender_user_id_, msg.chat_id_) and msg.reply_to_message_id_ then
+              function unmute_by_reply(extra, result, success)
+                local hash = 'bot:muted:'..msg.chat_id_
+                if not database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' بی صدا نیست !', 1, 'md')
+                else
+                  database:srem(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' از حالت بی صدا خارج گردید !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,unmute_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nmuteuser @(.*)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Uu]nmuteuser) @(.*)$")}
+              function unmute_by_username(extra, result, success)
+                if result.id_ then
+                  database:srem('bot:muted:'..msg.chat_id_, result.id_)
+                  text = '👤کاربر با شناسه : '..result.id_..' از حالت بی صدا خارج گردید !'
+                else
+                  text = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+              end
+              resolve_username(ap[2],unmute_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Uu]nmuteuser (%d+)$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Uu]nmuteuser) (%d+)$")}
+              database:srem('bot:muted:'..msg.chat_id_, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..ap[2]..' از حالت بی صدا خارج گردید !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ss]etowner$") and is_admin(msg.sender_user_id_) and msg.reply_to_message_id_ then
+              function setowner_by_reply(extra, result, success)
+                local hash = 'bot:owners:'..msg.chat_id_
+                if database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر '..result.sender_user_id_..' هم اکنون صاحب گروه میباشد !', 1, 'md')
+                else
+                  database:sadd(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر '..result.sender_user_id_..' به عنوان صاحب گروه انتخاب شد !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,setowner_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ss]etowner @(.*)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Ss]etowner) @(.*)$")}
+              function setowner_by_username(extra, result, success)
+                if result.id_ then
+                  database:sadd('bot:owners:'..msg.chat_id_, result.id_)
+                  texts = '👤 کاربر '..result.id_..' به عنوان صاحب گروه انتخاب شد !'
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],setowner_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ss]etowner (%d+)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
+              local ap = {string.match(text, "^([Ss]etowner) (%d+)$")}
+              database:sadd('bot:owners:'..msg.chat_id_, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر '..ap[2]..' به عنوان صاحب گروه انتخاب شد !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emowner$") and is_admin(msg.sender_user_id_) and msg.reply_to_message_id_ then
+              function deowner_by_reply(extra, result, success)
+                local hash = 'bot:owners:'..msg.chat_id_
+                if not database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' صاحب گروه نیست !', 1, 'md')
+                else
+                  database:srem(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' از مقام صاحب گروه حذف شد !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,deowner_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emowner @(.*)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
+              local hash = 'bot:owners:'..msg.chat_id_
+              local ap = {string.match(text, "^([Dd]emowner) @(.*)$")}
+              function remowner_by_username(extra, result, success)
+                if result.id_ then
+                  database:srem(hash, result.id_)
+                  texts = '👤 کاربر : '..result.id_..' از مقام صاحب گروه حذف شد !'
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],remowner_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Dd]emowner (%d+)$") and is_admin(msg.sender_user_id_, msg.chat_id_) then
+              local hash = 'bot:owners:'..msg.chat_id_
+              local ap = {string.match(text, "^([Dd]emowner) (%d+)$")}
+              database:srem(hash, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..ap[2]..' از مقام صاحب گروه حذف شد !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Aa]ddadmin$") and is_sudo(msg) and msg.reply_to_message_id_ then
+              function addadmin_by_reply(extra, result, success)
+                local hash = 'bot:admins:'
+                if database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' هم اکنون ادمین است !', 1, 'md')
+                else
+                  database:sadd(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' به ادمین ها اضافه شد !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,addadmin_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Aa]ddadmin @(.*)$") and is_sudo(msg) then
+              local ap = {string.match(text, "^([Aa]ddadmin) @(.*)$")}
+              function addadmin_by_username(extra, result, success)
+                if result.id_ then
+                  database:sadd('bot:admins:', result.id_)
+                  texts = '👤 کاربر : '..result.id_..' به ادمین ها اضافه شد !'
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],addadmin_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Aa]ddadmin (%d+)$") and is_sudo(msg) then
+              local ap = {string.match(text, "^([Aa]ddadmin) (%d+)$")}
+              database:sadd('bot:admins:', ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..ap[2]..' به ادمین ها اضافه شد !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Rr]emadmin$") and is_sudo(msg) and msg.reply_to_message_id_ then
+              function deadmin_by_reply(extra, result, success)
+                local hash = 'bot:admins:'
+                if not database:sismember(hash, result.sender_user_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' ادمین نیست !', 1, 'md')
+                else
+                  database:srem(hash, result.sender_user_id_)
+                  send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..result.sender_user_id_..' از ادمینی حذف شد !', 1, 'md')
+                end
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,deadmin_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Rr]emadmin @(.*)$") and is_sudo(msg) then
+              local hash = 'bot:admins:'
+              local ap = {string.match(text, "^([Rr]emadmin) @(.*)$")}
+              function remadmin_by_username(extra, result, success)
+                if result.id_ then
+                  database:srem(hash, result.id_)
+                  texts = '👤 کاربر : '..result.id_..' از ادمینی حذف شد !'
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'html')
+              end
+              resolve_username(ap[2],remadmin_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Rr]emadmin (%d+)$") and is_sudo(msg) then
+              local hash = 'bot:admins:'
+              local ap = {string.match(text, "^([Rr]emadmin) (%d+)$")}
+              database:srem(hash, ap[2])
+              send(msg.chat_id_, msg.id_, 1, '👤 کاربر : '..ap[2]..' از ادمینی حذف شد !', 1, 'md')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]odlist$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local hash =  'bot:mods:'..msg.chat_id_
+              local list = database:smembers(hash)
+              local text = "👥 لیست مدیران گروه : \n\n"
+              for k,v in pairs(list) do
+                local user_info = database:hgetall('user:'..v)
+                if user_info and user_info.username then
+                  local username = user_info.username
+                  text = text..k.." - @"..username.." ["..v.."]\n"
+                else
+                  text = text..k.." - "..v.."\n"
+                end
+              end
+              if #list == 0 then
+                text = "👥 لیست مدیران خالی است !"
+              end
+              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Mm]utelist$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local hash =  'bot:muted:'..msg.chat_id_
+              local list = database:smembers(hash)
+              local text = "🔇 لیست افراد بی صدا : \n\n"
+              for k,v in pairs(list) do
+                local user_info = database:hgetall('user:'..v)
+                if user_info and user_info.username then
+                  local username = user_info.username
+                  text = text..k.." - @"..username.." ["..v.."]\n"
+                else
+                  text = text..k.." - "..v.."\n"
+                end
+              end
+              if #list == 0 then
+                text = "🔇 لیست افراد بی صدا خالی است ! "
+              end
+              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Oo]wner$") or text:match("^[Oo]wnerlist$") and is_sudo(msg) then
+              local hash =  'bot:owners:'..msg.chat_id_
+              local list = database:smembers(hash)
+              local text = "👤 لیست صاحبان گروه : \n\n"
+              for k,v in pairs(list) do
+                local user_info = database:hgetall('user:'..v)
+                if user_info and user_info.username then
+                  local username = user_info.username
+                  text = text..k.." - @"..username.." ["..v.."]\n"
+                else
+                  text = text..k.." - "..v.."\n"
+                end
+              end
+              if #list == 0 then
+                text = "👤 لیست صاحبان گروه خالی است !"
+              end
+              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Bb]anlist$") and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              local hash =  'bot:banned:'..msg.chat_id_
+              local list = database:smembers(hash)
+              local text = "📛 لیست افراد مسدود شده : \n\n"
+              for k,v in pairs(list) do
+                local user_info = database:hgetall('user:'..v)
+                if user_info and user_info.username then
+                  local username = user_info.username
+                  text = text..k.." - @"..username.." ["..v.."]\n"
+                else
+                  text = text..k.." - "..v.."\n"
+                end
+              end
+              if #list == 0 then
+                text = "📛 لیست افراد مسدود شده خالی است !"
+              end
+              send(msg.chat_id_, msg.id_, 1, text, 1, 'html')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Aa]dminlist$") and is_leader(msg) then
+              local hash =  'bot:admins:'
+              local list = database:smembers(hash)
+              local text = "👥 لیست ادمین ها :\n\n"
+              for k,v in pairs(list) do
+                local user_info = database:hgetall('user:'..v)
+                if user_info and user_info.username then
+                  local username = user_info.username
+                  text = text..k.." - @"..username.." ["..v.."]\n"
+                else
+                  text = text..k.." - "..v.."\n"
+                end
+              end
+              if #list == 0 then
+                text = "👥 لیست ادمین ها خالی است !"
+              end
+              send(msg.chat_id_, msg.id_, 1, text, 'html')
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ii]d$") and msg.reply_to_message_id_ ~= 0 then
+              function id_by_reply(extra, result, success)
+                local user_msgs = database:get('user:msgs'..result.chat_id_..':'..result.sender_user_id_)
+                send(msg.chat_id_, msg.id_, 1, "🔹شناسه کاربر : "..result.sender_user_id_.."\n🔸تعداد پیام های ارسالی  : "..user_msgs, 1, 'md')
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,id_by_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ii]d @(.*)$") then
+              local ap = {string.match(text, "^([Ii]d) @(.*)$")}
+              function id_by_username(extra, result, success)
+                if result.id_ then
+                  if is_sudo(result) then
+                    t = '⭐️ مدیر ربات ⭐️'
+                  elseif is_admin(result.id_) then
+                    t = '⭐️ ادمین ربات ⭐️'
+                  elseif is_owner(result.id_, msg.chat_id_) then
+                    t = '👤 صاحب گروه 👤'
+                  elseif is_mod(result.id_, msg.chat_id_) then
+                    t = '👥 مدیر گروه 👥'
+                  else
+                    t = '🔅 کاربر 🔅'
+                  end
+                  texts = '🔹 یوزرنیم : @'..ap[2]..'\n🔸 شناسه : ('..result.id_..')\n 🔹 مقام : '..t
+                else
+                  texts = 'کاربر یافت نشد ❌'
+                end
+                send(msg.chat_id_, msg.id_, 1, texts, 1, 'md')
+              end
+              resolve_username(ap[2],id_by_username)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Kk]ick$") and msg.reply_to_message_id_ and is_mod(msg.sender_user_id_, msg.chat_id_) then
+              function kick_reply(extra, result, success)
+                if is_mod(result.sender_user_id_, result.chat_id_) then
+                  send(msg.chat_id_, msg.id_, 1, '❌شما نمیتوانید مدیران را مسدود یا اخراج کنید !', 1, 'md')
+                else
+                  send(msg.chat_id_, msg.id_, 1, '👤کاربر با شناسه : '..result.sender_user_id_..' اخراج شد !', 1, 'html')
+                  chat_kick(result.chat_id_, result.sender_user_id_)
+                end
+              end
+              getMessage(msg.chat_id_,msg.reply_to_message_id_,kick_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ii]nvite$") and msg.reply_to_message_id_ and is_sudo(msg) then
+              function inv_reply(extra, result, success)
+                add_user(result.chat_id_, result.sender_user_id_, 5)
+              end
+              getMessage(msg.chat_id_, msg.reply_to_message_id_,inv_reply)
+            end
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Ii]d$") and msg.reply_to_message_id_ == 0  then
+              local user_msgs = database:get('user:msgs'..msg.chat_id_..':'..msg.sender_user_id_)
+              local function getpro(extra, result, success)
+                if database:get('getidstatus'..msg.chat_id_) == "Photo" then
+                  if result.photos_[0] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_,'🔸شناسه شما : '..msg.sender_user_id_..'\n🔹تعداد پیام های ارسالی شما : '..user_msgs,msg.id_,msg.id_)
+                  end
+                elseif not result.photos_[0] then
+                  send(msg.chat_id_, msg.id_, 1, "❌ شما عکس پروفایل ندارید !\n\n🔸شناسه شما : "..msg.sender_user_id_.."\n🔹تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
                 end
               end
               if database:get('getidstatus'..msg.chat_id_) == "Simple" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> Your ID : "..msg.sender_user_id_.."\n> Number of messages : "..user_msgs, 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
-                end
+                send(msg.chat_id_, msg.id_, 1, "🔸شناسه شما : "..msg.sender_user_id_.."\n🔹تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
               end
               if not database:get('getidstatus'..msg.chat_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> Your ID : "..msg.sender_user_id_.."\n> Number of messages : "..user_msgs, 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
-                end
+                send(msg.chat_id_, msg.id_, 1, "🔸شناسه شما : "..msg.sender_user_id_.."\n🔹تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
               end
+              tdcli_function ({
+                ID = "GetUserProfilePhotos",
+                user_id_ = msg.sender_user_id_,
+                offset_ = 0,
+                limit_ = 1
+              }, getpro, nil)
             end
-            tdcli_function ({
-              ID = "GetUserProfilePhotos",
-              user_id_ = msg.sender_user_id_,
-              offset_ = 0,
-              limit_ = 1
-            }, getproen, nil)
-          end
-          if text:match("^آیدی$") then
-            local user_msgs = database:get('user:msgs'..msg.chat_id_..':'..msg.sender_user_id_)
-            local function getprofa(extra, result, success)
-              if database:get('getidstatus'..msg.chat_id_) == "Photo" then
-                if result.photos_[0] then
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_,'> Your ID : '..msg.sender_user_id_..'\n> Number of messages : '..user_msgs,msg.id_,msg.id_)
-                  else
-                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_,'> شناسه شما : '..msg.sender_user_id_..'\n> تعداد پیام های ارسالی شما : '..user_msgs,msg.id_,msg.id_)
-                  end
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "> You don't have profile photo !\n\n> Your ID : "..msg.sender_user_id_.."\n> Number of messages  : "..user_msgs, 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "> شما عکس پروفایل ندارید !\n\n> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
-                  end
-                end
-              end
-              if database:get('getidstatus'..msg.chat_id_) == "Simple" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> Your ID : "..msg.sender_user_id_.."\n> Number of messages : "..user_msgs, 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
-                end
-              end
-              if not database:get('getidstatus'..msg.chat_id_) then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> Your ID : "..msg.sender_user_id_.."\n> Number of messages : "..user_msgs, 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "> شناسه شما : "..msg.sender_user_id_.."\n> تعداد پیام های ارسالی شما : "..user_msgs, 1, 'md')
-                end
-              end
-            end
-            tdcli_function ({
-              ID = "GetUserProfilePhotos",
-              user_id_ = msg.sender_user_id_,
-              offset_ = 0,
-              limit_ = 1
-            }, getprofa, nil)
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        local text = msg.content_.text_:gsub('وضعیت دریافت عکس پروفایل','Getprofilestatus')
-        if is_momod(msg.sender_user_id_, msg.chat_id_) then
-          if text:match("^[Gg]etprofilestatus (.*)$") then
-            local status = {string.match(text, "^([Gg]etprofilestatus) (.*)$")}
-            if status[2] == "active" or status[2] == "فعال" then
-              if database:get('getpro:'..msg.chat_id_) == "Active" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> Get profile photo is *already* actived ', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> وضعیت دریافت عکس پروفایل از قبل بر روی حالت #فعال میباشد ! ', 1, 'md')
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> Get profile photo has been changed to *active* ', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> وضعیت دریافت عکس پروفایل بر روی حالت #فعال تنظیم شد !', 1, 'md')
-                end
-                database:set('getpro:'..msg.chat_id_,'Active')
-              end
-            end
-            if status[2] == "deactive" or status[2] == "غیرفعال" then
-              if database:get('getpro:'..msg.chat_id_) == "Deactive" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> Get profile photo is *already* deactived', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> وضعیت دریافت عکس پروفایل از قبل بر روی حالت #غیرفعال میباشد !', 1, 'md')
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, 'Get profile photo has been change to *deactive* !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> وضعیت دریافت عکس پروفایل بر روی حالت #غیرفعال تنظیم شد !', 1, 'md')
-                end
-                database:set('getpro:'..msg.chat_id_,'Deactive')
-              end
-            end
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[Gg]etpro (%d+)$") then
-          local pronumb = {string.match(text, "^([Gg]etpro) (%d+)$")}
-          local function gproen(extra, result, success)
-            if not is_momod(msg.sender_user_id_, msg.chat_id_) and database:get('getpro:'..msg.chat_id_) == "Deactive" then
-              if database:get('lang:gp:'..msg.chat_id_) then
-                send(msg.chat_id_, msg.id_, 1, "> Get profile photo is deactive !", 1, 'md')
-              else
-                send(msg.chat_id_, msg.id_, 1, "> دریافت عکس پروفایل غیرفعال شده است !", 1, 'md')
-              end
-            else
-              if pronumb[2] == '1' then
-                if result.photos_[0] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have profile photo !", 1, 'md')
+            -----------------------------------------------------------------------------------------------
+            if text:match("^[Gg]etpro (%d+)$") and msg.reply_to_message_id_ == 0  then
+              local pronumb = {string.match(text, "^([Gg]etpro) (%d+)$")}
+              local function gpro(extra, result, success)
+                --vardump(result)
+                if pronumb[2] == '1' then
+                  if result.photos_[0] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '2' then
-                if result.photos_[1] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[1].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 2 profile photo !", 1, 'md')
+                elseif pronumb[2] == '2' then
+                  if result.photos_[1] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[1].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 2 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '3' then
-                if result.photos_[2] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[2].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 3 profile photo !", 1, 'md')
+                elseif pronumb[2] == '3' then
+                  if result.photos_[2] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[2].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 3 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '4' then
-                if result.photos_[3] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[3].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 4 profile photo !", 1, 'md')
+                elseif pronumb[2] == '4' then
+                  if result.photos_[3] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[3].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 4 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '5' then
-                if result.photos_[4] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[4].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't 5 have profile photo !", 1, 'md')
+                elseif pronumb[2] == '5' then
+                  if result.photos_[4] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[4].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 5 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '6' then
-                if result.photos_[5] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[5].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 6 profile photo !", 1, 'md')
+                elseif pronumb[2] == '6' then
+                  if result.photos_[5] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[5].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 6 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '7' then
-                if result.photos_[6] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[6].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 7 profile photo !", 1, 'md')
+                elseif pronumb[2] == '7' then
+                  if result.photos_[6] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[6].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 7 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '8' then
-                if result.photos_[7] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[7].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 8 profile photo !", 1, 'md')
+                elseif pronumb[2] == '8' then
+                  if result.photos_[7] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[7].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 8 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '9' then
-                if result.photos_[8] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[8].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 9 profile photo !", 1, 'md')
+                elseif pronumb[2] == '9' then
+                  if result.photos_[8] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[8].sizes_[1].photo_.persistent_id_)
                   else
                     send(msg.chat_id_, msg.id_, 1, "شما 9 عکس پروفایل ندارید", 1, 'md')
                   end
-                end
-              elseif pronumb[2] == '10' then
-                if result.photos_[9] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[9].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 10 profile photo !", 1, 'md')
+                elseif pronumb[2] == '10' then
+                  if result.photos_[9] then
+                    sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[9].sizes_[1].photo_.persistent_id_)
                   else
-                    send(msg.chat_id_, msg.id_, 1, "شما 10 عکس پروفایل ندارید", 1, 'md')
+                    send(msg.chat_id_, msg.id_, 1, "شما 10 عسس پروفایل ندارید", 1, 'md')
                   end
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> I just can get last 10 profile photos !", 1, 'md')
                 else
-                  send(msg.chat_id_, msg.id_, 1, "> من فقط میتوانم  10 عکس آخر را نمایش دهم !", 1, 'md')
+                  send(msg.chat_id_, msg.id_, 1, "من فقط میتواند 10 عکس آخر را نمایش دهم", 1, 'md')
                 end
               end
+              tdcli_function ({
+                ID = "GetUserProfilePhotos",
+                user_id_ = msg.sender_user_id_,
+                offset_ = 0,
+                limit_ = pronumb[2]
+              }, gpro, nil)
             end
-          end
-          tdcli_function ({
-            ID = "GetUserProfilePhotos",
-            user_id_ = msg.sender_user_id_,
-            offset_ = 0,
-            limit_ = pronumb[2]
-          }, gproen, nil)
-        end
-        if text:match("^عکس پروفایلم (%d+)$") then
-          local pronumb = {string.match(text, "^(عکس پروفایلم) (%d+)$")}
-          if not is_momod(msg.sender_user_id_, msg.chat_id_) and database:get('getpro:'..msg.chat_id_) == "Deactive" then
-            if database:get('lang:gp:'..msg.chat_id_) then
-              send(msg.chat_id_, msg.id_, 1, "> Get profile photo is deactive !", 1, 'md')
-            else
-              send(msg.chat_id_, msg.id_, 1, "> دریافت عکس پروفایل غیرفعال شده است !", 1, 'md')
-            end
-          else
-            local function gprofa(extra, result, success)
-              --vardump(result)
-              if pronumb[2] == '1' then
-                if result.photos_[0] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[0].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '2' then
-                if result.photos_[1] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[1].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 2 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 2 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '3' then
-                if result.photos_[2] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[2].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 3 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 3 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '4' then
-                if result.photos_[3] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[3].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 4 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 4 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '5' then
-                if result.photos_[4] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[4].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't 5 have profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 5 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '6' then
-                if result.photos_[5] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[5].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 6 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 6 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '7' then
-                if result.photos_[6] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[6].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 7 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 7 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '8' then
-                if result.photos_[7] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[7].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 8 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 8 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '9' then
-                if result.photos_[8] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[8].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 9 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 9 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              elseif pronumb[2] == '10' then
-                if result.photos_[9] then
-                  sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, result.photos_[9].sizes_[1].photo_.persistent_id_)
-                else
-                  if database:get('lang:gp:'..msg.chat_id_) then
-                    send(msg.chat_id_, msg.id_, 1, "You don't have 10 profile photo !", 1, 'md')
-                  else
-                    send(msg.chat_id_, msg.id_, 1, "شما 10 عکس پروفایل ندارید", 1, 'md')
-                  end
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, "> I just can get last 10 profile photos !", 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, "> من فقط میتوانم  10 عکس آخر را نمایش دهم !", 1, 'md')
-                end
-              end
-            end
-          end
-          tdcli_function ({
-            ID = "GetUserProfilePhotos",
-            user_id_ = msg.sender_user_id_,
-            offset_ = 0,
-            limit_ = pronumb[2]
-          }, gprofa, nil)
-        end
         -----------------------------------------------------------------------------------------------
         if is_momod(msg.sender_user_id_, msg.chat_id_) then
           if text:match("^[Ll]ock (.*)$") or text:match("^قفل (.*)$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
