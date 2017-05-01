@@ -1,3 +1,4 @@
+
 ----------------------------
 --*********Serpent*******--
 serpent = require("serpent")
@@ -16,7 +17,7 @@ day = 86400
 bot_id = 342601187 -- [[محل قرار گیری آیدی اکانت ربات]]
 --**********************--
 --*********SUDO ID*******--
-sudo_users = {342293523,103631172} -- [[محل قرار گیری آیدی سودو ها]]
+sudo_users = {342293523,103631172,272376346,287192786,258220821,192191034,181612899,289063789} -- [[محل قرار گیری آیدی سودو ها]]
 --***********************--
 --********BOT OWNER******--
 bot_owner = 103631172 -- [[ محل قرار گیری آیدی مدیر اصلی ربات ]]
@@ -230,13 +231,6 @@ function resolve_username(username,cb)
     ID = "SearchPublicChat",
     username_ = username
   }, cb, nil)
-end
------------------------------------------------------------------------------------------------
- local function importChatInviteLink(invite_link, dl_cb, cmd)
-  tdcli_function ({
-    ID = "ImportChatInviteLink",
-    invite_link_ = invite_link
-  }, dl_cb, cmd)
 end
 -----------------------------------------------------------------------------------------------
 function changeChatMemberStatus(chat_id, user_id, status)
@@ -3826,43 +3820,6 @@ function tdcli_update_callback(data)
               end
             end
           end
-           -----------------------------------------------------------------------------------------------
-          local text = msg.content_.text_:gsub('خواندن پیام','MarkRead Meesage')
-          if text:match("^[Mm]arkread (.*)$") then
-            local status = {string.match(text, "^([Mm]arkread) (.*)$")}
-            if status[2] == "فعال" or status[2] == "on" then
-              if database:get('markread') == "On" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> MarkRead is now active !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> خواندن پیام از قبل فعال است ! ', 1, 'md')
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> MarkRead has been actived !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> خواندن پیام فعال شد !', 1, 'md')
-                end
-                database:set('markread','On')
-              end
-            end
-            if status[2] == "غیرفعال" or status[2] == "off" then
-              if database:get('markread') == "Off" then
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> MarkRead is now deactive !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> خواندن پیام از قبل غیرفعال میباشد !', 1, 'md')
-                end
-              else
-                if database:get('lang:gp:'..msg.chat_id_) then
-                  send(msg.chat_id_, msg.id_, 1, '> MarkRead leave has been deactived !', 1, 'md')
-                else
-                  send(msg.chat_id_, msg.id_, 1, '> خواندن پیام غیرفعال شد !', 1, 'md')
-                end
-                database:set('markread','Off')
-              end
-            end
-          end
         end
         -----------------------------------------------------------------------------------------------
         if is_momod(msg.sender_user_id_, msg.chat_id_) then
@@ -4108,20 +4065,10 @@ function tdcli_update_callback(data)
             clerken = "Deactive"
             clerkfa = "غیرفعال"
           end
-	    if database:get('markread') == "On" then
-            markreaden = "Active"
-            markreadfa = "فعال"
-          elseif database:get('markread') == "Off" then
-            markreaden = "Deactive"
-            markreadfa = "غیرفعال"
-          elseif not database:get('markread') then
-            markreaden = "Deactive"
-            markreadfa = "غیرفعال"
-          end
           if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> Status : \n\n> Groups : '..gps..'\n\n> Msg received  : '..allmgs..'\n\n> Auto Leave : '..autoleaveen..'\n\n> MarkRead Message : '..markreaden..'\n\n> Clerk : '..clerken, 1, 'md')
+            send(msg.chat_id_, msg.id_, 1, '> Status : \n\n> Groups : '..gps..'\n\n> Msg received  : '..allmgs..'\n\n> Auto Leave : '..autoleaveen..'\n\n> Clerk : '..clerken, 1, 'md')
           else
-            send(msg.chat_id_, msg.id_, 1, '> وضعیت ربات : \n\n> تعداد گروه ها : '..gps..'\n\n> تعداد پیام های دریافتی  : '..allmgs..'\n\n> خروج خودکار : '..autoleavefa..'\n\n> خواندن پیام : '..markreadfa..'\n\n> منشی : '..clerkfa, 1, 'md')
+            send(msg.chat_id_, msg.id_, 1, '> وضعیت ربات : \n\n> تعداد گروه ها : '..gps..'\n\n> تعداد پیام های دریافتی  : '..allmgs..'\n\n> خروج خودکار : '..autoleavefa..'\n\n> منشی : '..clerkfa, 1, 'md')
           end
         end
         ------------------------------------------------------------------------------
@@ -5068,6 +5015,17 @@ function tdcli_update_callback(data)
           end
         end
         -----------------------------------------------------------------------------------------------
+        if is_sudo(msg) then
+          if text:match("^[Ee]dit (.*)$") then
+            local editmsg = {string.match(text, "^([Ee]dit) (.*)$")}
+            edit(msg.chat_id_, msg.reply_to_message_id_, nil, editmsg[2], 1, 'html')
+          end
+          if text:match("^ویرایش (.*)$") then
+            local editmsgs = {string.match(text, "^(ویرایش) (.*)$")}
+            edit(msg.chat_id_, msg.reply_to_message_id_, nil,editmsgs[2], 1, 'html')
+          end
+        end
+        -----------------------------------------------------------------------------------------------
         if is_momod(msg.sender_user_id_, msg.chat_id_) then
           if text:match("^[Cc]lean (.*)$") or text:match("^پاکسازی (.*)$")then
             local txt = {string.match(text, "^([Cc]lean) (.*)$")}
@@ -5090,16 +5048,20 @@ function tdcli_update_callback(data)
                 end
               end
             end
-		 if txt[2] == 'bots' then
-	  local function g_bots(extra,result,success)
-      local bots = result.members_
-      for i=0 , #bots do
-          chat_kick(msg.chat_id_,bots[i].user_id_)
-          end
-      end
-    channel_get_bots(msg.chat_id_,g_bots)
-	                       send(msg.chat_id_, msg.id_, 1, '> تمامی ربات ها از گروه پاکسازی شدند !', 1, 'md')
-	end
+            if txt[2] == 'bots' or txts[2] == 'ربات ها' then
+              local function g_bots(extra,result,success)
+                local bots = result.members_
+                for i=0 , #bots do
+                  chat_kick(msg.chat_id_, bots[i].user_id_)
+                end
+              end
+              channel_get_bots(msg.chat_id_,g_bots)
+              if database:get('lang:gp:'..msg.chat_id_) then
+                send(msg.chat_id_, msg.id_, 1, '> All bots has been removed from group !', 1, 'md')
+              else
+                send(msg.chat_id_, msg.id_, 1, '> تمامی ربات ها از گروه پاکسازی شدند !', 1, 'md')
+              end
+            end
             if txt[2] == 'modlist' or txts[2] == 'لیست مدیران گروه' then
               if database:get('lang:gp:'..msg.chat_id_) then
                 send(msg.chat_id_, msg.id_, 1, '> Mod list has been cleared ', 1, 'md')
@@ -5467,27 +5429,6 @@ function tdcli_update_callback(data)
           local note = database:get('owner:note1')
           send(msg.chat_id_, msg.id_, 1, note, 1, nil)
         end
-	  -----------------------------------------------------------------------------------------------
-        if text:match("^[Ss]etnerkh (.*)$") and is_leader(msg) then
-          local txt = {string.match(text, "^([Ss]etnerkh) (.*)$")}
-          database:set('owner:nerkh1', txt[2])
-          if database:get('lang:gp:'..msg.chat_id_) then
-            send(msg.chat_id_, msg.id_, 1, '> Saved Nerkh !', 1, 'md')
-          else
-            send(msg.chat_id_, msg.id_, 1, '> نرخ جدید ذخیره شد !', 1, 'md')
-          end
-        end
-        -----------------------------------------------------------------------------------------------
-        if text:match("^[nN]erkh$") and is_leader(msg) then
-          local nerkh = database:get('owner:nerkh1')
-          send(msg.chat_id_, msg.id_, 1, nerkh, 1, nil)
-        end
-        -------------------------------------------------------------------------------------------------
-	if text:match("^[iI]mport (.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-	local txt = {string.match(text, "^([iI]mport) (.*)$")} 
-	     importChatInviteLink(msg.chat_id_, txt[2])
-       send(msg.chat_id_, msg.id_, 1, '> ربات با موفقیت وارد گروه شد !', 1, 'md')
-    end
         -------------------------------------------------------------------------------------------------
         if text:match("^[Rr]ules$") or text:match("^دریافت قوانین$") then
           local rules = database:get('bot:rules'..msg.chat_id_)
@@ -5495,7 +5436,7 @@ function tdcli_update_callback(data)
         end
         -----------------------------------------------------------------------------------------------
         if text:match("^[Ss]hare$") and is_sudo(msg) then
-          sendContact(msg.chat_id_, msg.id_, 0, 1, nil, 989398300361, 'Mohammad', 'NBG', 250049437)
+          sendContact(msg.chat_id_, msg.id_, 0, 1, nil, 989152033832, 'Sajjad', 'Momen', 228572542)
         end
         -----------------------------------------------------------------------------------------------
         if text:match("^[Rr]ename (.*)$") or text:match("^تنظیم نام گروه (.*)$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
@@ -5648,29 +5589,6 @@ function tdcli_update_callback(data)
           send(msg.chat_id_, msg.id_, 1, 'پلن 1 با موفقیت برای گروه '..txt[2]..' فعال شد\nاین گروه تا 30 روز دیگر اعتبار دارد! ( 1 ماه )', 1, 'md')
           database:set("bot:enable:"..txt[2],true)
         end
-	-----------------------------------------------------------------------------------------------
-	if text:match("^([sS][hH][oO][wW]) ([eE][dD][Ii][tT])$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-         send(msg.chat_id_, msg.id_, 1, '_فعال شد_\nاز این پس اگر متنی ادیت شود متن قبل ادیت به نمایش در میاید', 1, 'md')
-         database:set('editmsg'..msg.chat_id_,'didam')
-	end
-	-----------------------------------------------------------------------------------------------
-	if text:match("^([Uu][Nn][sS][hH][oO][wW]) ([eE][dD][Ii][tT])$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-         send(msg.chat_id_, msg.id_, 1, '_غیرفعال شد_\nاز این پس اگر متنی ادیت شود متن قبل ادیت به نمایش در نمیاید', 1, 'md')
-         database:del('editmsg'..msg.chat_id_,'didam')
-	end
-        -----------------------------------------------------------------------------------------------
-	   if text:match("^[pp][ii][nn]$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-        local id = msg.id_
-        local msgs = {[0] = id}
-       pin(msg.chat_id_,msg.reply_to_message_id_,0)
-	   database:set('pinnedmsg'..msg.chat_id_,msg.reply_to_message_id_)
-	      send(msg.chat_id_, msg.id_, 1, '_پیام مورد نظر سنجاق گردید_', 1, 'md')
-   end
-   -----------------------------------------------------------------------------------------------
-   if text:match("^[uu][nn][pp][ii][nn]$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-         unpinmsg(msg.chat_id_)
-         send(msg.chat_id_, msg.id_, 1, '_پیام از  حالت سنجاق حذف گردید_', 1, 'md')
-   end
         -----------------------------------------------------------------------------------------------
         if text:match('^[Pp]lan2(-%d+)') and is_admin(msg.sender_user_id_, msg.chat_id_) then
           local txt = {string.match(text, "^([Pp]lan2)(-%d+)$")}
@@ -5686,11 +5604,6 @@ function tdcli_update_callback(data)
           send(msg.chat_id_, msg.id_, 1, 'پلن 3 با موفقیت برای گروه '..txt[2]..' فعال شد\nاین گروه به صورت نامحدود شارژ شد!', 1, 'md')
           database:set("bot:enable:"..txt[2],true)
         end
-	-------------------------------------------------------------------------------------------------
-	 if text:match("^[rR]eload$") then
-    dofile('ESET.lua')
-     send(msg.chat_id_, msg.id_, 1, '🌀ربات بروزرسانی شد', 1, 'md')
-            end
         -----------------------------------------------------------------------------------------------
         if text:match('^[Aa]dd$') and is_admin(msg.sender_user_id_, msg.chat_id_) then
           function adding(extra,result,success)
@@ -5755,10 +5668,10 @@ function tdcli_update_callback(data)
           local txt = {string.match(text, "^([Dd]ata) (%d+)$")}
           local hash =  'sudo:data:'..txt[2]
           local list = database:smembers(hash)
-          if tonumber(txt[2]) == 250049437 then
+          if tonumber(txt[2]) == 181612899 then
             name = "محمد"
-          elseif tonumber(txt[2]) == 247134702 then
-            name = "کیارش"
+          elseif tonumber(txt[2]) == 192191034 then
+            name = "احسان"
           elseif tonumber(txt[2]) == 222751735 then
             name = "محمد رضا"
           elseif tonumber(txt[2]) == 258220821 then
@@ -5809,15 +5722,6 @@ function tdcli_update_callback(data)
           send(msg.chat_id_, msg.id_, 1, 'باموفقیت شما را به گروه '..txt[2]..' اضافه کردم !', 1, 'md')
           add_user(txt[2], msg.sender_user_id_, 20)
         end
-	    -----------------------------------------------------------------------------------------------
-  	if text:match("^[eE][dD][iI][tT] (.*)$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-	local editmsg = {string.match(text, "^([eE][dD][iI][tT]) (.*)$")} 
-		 edit(msg.chat_id_, msg.reply_to_message_id_, nil, editmsg[2], 1, 'html')
-    end
-      	if text:match("^ویرایش (.*)$") and is_momod(msg.sender_user_id_, msg.chat_id_) then
-	local editmsg = {string.match(text, "^(ویرایش) (.*)$")} 
-		 edit(msg.chat_id_, msg.reply_to_message_id_, nil, editmsg[2], 1, 'html')
-    end
         ------------------------------------------------------------------------------------
         if text:match('^[Mm]eld(-%d+)') and is_sudo(msg) then
           local meld = {string.match(text, "^([Mm]eld)(-%d+)$")}
@@ -6016,64 +5920,119 @@ function tdcli_update_callback(data)
           end
         end
         ---------------------------------------Help Bot------------------------------------------------
-            if text:match("^[Hh]elp$") and is_owner(msg.sender_user_id_, msg.chat_id_) then
-                local help = io.open("./Help/help.txt", "r")
-                local helptime = 30
-                local a = ( help:read("*a") )
-                database:setex('helptime:'..msg.chat_id_, helptime, true)
-                send(msg.chat_id_, msg.id_, 1, a, 1, 'md')
-              end
-              if database:get('helptime:'..msg.chat_id_) then
-                if is_owner(msg.sender_user_id_, msg.chat_id_) then
-                  local helplock = io.open("./Help/helplock.txt", "r")
-                  local helpmedia = io.open("./Help/helpmedia.txt", "r")
-                  local helpsetlink = io.open("./Help/helpsetlink.txt", "r")
-                  local helpprodemo = io.open("./Help/helpprodemo.txt", "r")
-                  local helpjanebi = io.open("./Help/helpjanebi.txt", "r")
-                  local helpspamflood = io.open("./Help/helpfloodspam.txt", "r")
-                  local helpvaziat = io.open("./Help/helpvaziat.txt", "r")
-                  if text:match("^1$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local b = ( helpvaziat:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, b, 1, 'md')
-                  elseif text:match("^2$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local c = ( helplock:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, c, 1, 'md')
-                  elseif text:match("^3$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local d = ( helpmedia:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, d, 1, 'md')
-                  elseif text:match("^4$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local e = ( helpspamflood:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, e, 1, 'md')
-                  elseif text:match("^5$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local f = ( helpprodemo:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, f, 1, 'md')
-                  elseif text:match("^6$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local g = ( helpsetlink:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, g, 1, 'md')
-                  elseif text:match("^7$") then
-                    database:del('helptime:'..msg.chat_id_)
-                    local h = ( helpjanebi:read("*a") )
-                    send(msg.chat_id_, msg.id_, 1, h, 1, 'md')
-                  elseif text:match("^0$") then
-                    send(msg.chat_id_, msg.id_, 1, '> عملیات لغو گردید !', 1, 'md')
+        if is_momod(msg.sender_user_id_, msg.chat_id_) then
+          if text:match("^[Hh]elp$") or text:match("^راهنما$") then
+            local help = io.open("./Help/help.txt", "r")
+            local helpen = io.open("./Help/helpen.txt", "r")
+            local helptime = 60
+            local a = ( help:read("*a") )
+            local aen = ( helpen:read("*a") )
+            database:setex('helptime:'..msg.chat_id_, helptime, true)
+            if database:get('lang:gp:'..msg.chat_id_) then
+              send(msg.chat_id_, msg.id_, 1, aen, 1, 'md')
+            else
+              send(msg.chat_id_, msg.id_, 1, a, 1, 'md')
+            end
+          end
+          if database:get('helptime:'..msg.chat_id_) then
+            if is_momod(msg.sender_user_id_, msg.chat_id_) then
+              if database:get('lang:gp:'..msg.chat_id_) then
+                local helplocken = io.open("./Help/helplocken.txt", "r")
+                local helpmediaen = io.open("./Help/helpmediaen.txt", "r")
+                local helpsetlinken = io.open("./Help/helpsetlinken.txt", "r")
+                local helpprodemoen = io.open("./Help/helpprodemoen.txt", "r")
+                local helpjanebien = io.open("./Help/helpjanebien.txt", "r")
+                local helpspamflooden = io.open("./Help/helpfloodspamen.txt", "r")
+                local helpvaziaten = io.open("./Help/helpvaziaten.txt", "r")
+                if text:match("^1$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local b = ( helpvaziaten:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, b, 1, 'md')
+                elseif text:match("^2$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local c = ( helplocken:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, c, 1, 'md')
+                elseif text:match("^3$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local d = ( helpmediaen:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, d, 1, 'md')
+                elseif text:match("^4$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local e = ( helpspamflooden:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, e, 1, 'md')
+                elseif text:match("^5$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local f = ( helpprodemoen:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, f, 1, 'md')
+                elseif text:match("^6$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local g = ( helpsetlinken:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, g, 1, 'md')
+                elseif text:match("^7$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local h = ( helpjanebien:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, h, 1, 'md')
+                elseif text:match("^0$") then
+                  send(msg.chat_id_, msg.id_, 1, '> The operation was canceled !', 1, 'md')
+                  database:del('help:'..msg.chat_id_)
+                else
+                  if text:match("^%d+$") then
+                    send(msg.chat_id_, msg.id_, 1, '> Your number is not in the list!', 1, 'md')
                     database:del('help:'..msg.chat_id_)
-                  else
-                    if text:match("^%d+$") then
-                      send(msg.chat_id_, msg.id_, 1, '>  شماره مورد نظر شما در لیست موجود نمیباشد !', 1, 'md')
-                    end
                   end
                 end
               end
-              
+              if not database:get('lang:gp:'..msg.chat_id_) then
+                local helplock = io.open("./Help/helplock.txt", "r")
+                local helpmedia = io.open("./Help/helpmedia.txt", "r")
+                local helpsetlink = io.open("./Help/helpsetlink.txt", "r")
+                local helpprodemo = io.open("./Help/helpprodemo.txt", "r")
+                local helpjanebi = io.open("./Help/helpjanebi.txt", "r")
+                local helpspamflood = io.open("./Help/helpfloodspam.txt", "r")
+                local helpvaziat = io.open("./Help/helpvaziat.txt", "r")
+                if text:match("^1$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local b = ( helpvaziat:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, b, 1, 'md')
+                elseif text:match("^2$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local c = ( helplock:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, c, 1, 'md')
+                elseif text:match("^3$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local d = ( helpmedia:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, d, 1, 'md')
+                elseif text:match("^4$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local e = ( helpspamflood:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, e, 1, 'md')
+                elseif text:match("^5$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local f = ( helpprodemo:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, f, 1, 'md')
+                elseif text:match("^6$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local g = ( helpsetlink:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, g, 1, 'md')
+                elseif text:match("^7$") then
+                  database:del('helptime:'..msg.chat_id_)
+                  local h = ( helpjanebi:read("*a") )
+                  send(msg.chat_id_, msg.id_, 1, h, 1, 'md')
+                elseif text:match("^0$") then
+                  send(msg.chat_id_, msg.id_, 1, '> عملیات لغو گردید !', 1, 'md')
+                  database:del('help:'..msg.chat_id_)
+                else
+                  if text:match("^%d+$") then
+                    send(msg.chat_id_, msg.id_, 1, '> شماره مورد نظر شما در لیست موجود نمیباشد !', 1, 'md')
+                  end
+                end
+              end
+            end
+          end
+        end
         -----------------------------------------------------------------------------------------------
-        if text:match("^[vV]ps$") and is_sudo(msg) then
-          send(msg.chat_id_, msg.id_, 1, 'https://www.mizbanivps.com', 1, 'html')
+        if text:match("^[Pp]ayping$") and is_sudo(msg) then
+          send(msg.chat_id_, msg.id_, 1, 'https://www.payping.ir/EndlessLine', 1, 'html')
         end
       end
       -----------------------------------------------------------------------------------------------
@@ -6137,17 +6096,6 @@ function tdcli_update_callback(data)
         end
       end
     end
-    if database:get('editmsg'..msg.chat_id_) == 'delmsg' then
-        local id = msg.message_id_
-        local msgs = {[0] = id}
-        local chat = msg.chat_id_
-              delete_msg(chat,msgs)
-	elseif database:get('editmsg'..msg.chat_id_) == 'didam' then
-	if database:get('bot:editid'..msg.message_id_) then
-		local old_text = database:get('bot:editid'..msg.message_id_)
-	    send(msg.chat_id_, msg.message_id_, 1, '_چرا ادیت میکنی😠\nمن دیدم که گفتی:_\n\n*'..old_text..'*', 1, 'md')
-	end
-	end
     getMessage(msg.chat_id_, msg.message_id_,get_msg_contact)
     -----------------------------------------------------------------------------------------------
   elseif (data.ID == "UpdateOption" and data.name_ == "my_id") then
