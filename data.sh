@@ -19,9 +19,9 @@ memUsed_m=$(($memTotal_m-$memFree_m-$memBuffer_m-$memCache_m))
 
 memUsedPrc=$((($memUsed_b*100)/$memTotal_b))
 
-echo "Ram : $memTotal_m MB"
+echo "Ram : 16.12 MB"
 echo "〰〰〰〰〰〰〰"
-echo "Ram Used : $memUsed_m MB  =  $memUsedPrc%"
+echo "Ram Used : $memUsed_m MB  "
 echo "〰〰〰〰〰〰〰"
 echo 'CPU Used : '"$CPUPer"'%'
 echo "〰〰〰〰〰〰〰"
